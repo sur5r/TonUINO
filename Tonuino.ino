@@ -289,6 +289,29 @@ class SleepTimer: public Modifier {
     }
 };
 
+class VolumeLimiter: public Modifier {
+  private:
+    uint8_t maxVolume;
+
+  public:
+    VolumeLimiter(uint8_t maxVolume) {
+      Serial.println("Volume limiter active");
+      Serial.print("Max Volume: ");
+      Serial.println(maxVolume);
+      this->maxVolume = maxVolume;
+      volume = mySettings.minVolume;
+      delay(500);
+      mp3.setVolume(volume);
+    }
+
+    virtual bool handleVolumeUp() {
+      return (volume >= maxVolume);
+    }
+    virtual uint8_t getActive() {
+      return 7;
+    }
+};
+
 class FreezeDance: public Modifier {
   private:
     unsigned long nextStopAtMillis = 0;
@@ -1672,6 +1695,7 @@ bool readCard(nfcTagObject * nfcTag) {
         case 4: activeModifier = new ToddlerMode(); break;
         case 5: activeModifier = new KindergardenMode(); break;
         case 6: activeModifier = new RepeatSingleModifier(); break;
+        case 7: activeModifier = new VolumeLimiter(tempCard.nfcFolderSettings.special); break;
 
       }
       delay(2000);
